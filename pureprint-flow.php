@@ -68,6 +68,7 @@ function pureprint_flow_deactivate() {
 require_once PUREPRINT_PATH . 'includes/class-pureprint-flow-frontend.php';
 require_once PUREPRINT_PATH . 'includes/class-pureprint-flow-admin.php';
 require_once PUREPRINT_PATH . 'includes/class-pureprint-flow-pdf.php';
+require_once PUREPRINT_PATH . 'includes/class-pureprint-flow-github-updater.php';
 
 // Initialize core components
 add_action( 'plugins_loaded', 'pureprint_flow_init' );
@@ -75,6 +76,15 @@ function pureprint_flow_init() {
 	if ( class_exists( 'WooCommerce' ) ) {
 		PurePrint_Flow_Frontend::init();
 		PurePrint_Flow_Admin::init();
+	}
+
+	// GitHub auto-updater (works independently from WooCommerce)
+	if ( is_admin() ) {
+		new PurePrint_Flow_GitHub_Updater(
+			PUREPRINT_PATH . 'pureprint-flow.php',
+			'Gianfry70IT',
+			'pureprint-flow'
+		);
 	}
 }
 
