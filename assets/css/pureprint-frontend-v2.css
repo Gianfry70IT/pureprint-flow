@@ -1,0 +1,349 @@
+/**
+ * PurePrint Flow - Frontend Stylesheet
+ * Sleek, modern, and interactive editor layout.
+ */
+
+.pureprint-customizer-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1a202c;
+    box-sizing: border-box;
+}
+
+.pureprint-customizer-container * {
+    box-sizing: border-box;
+}
+
+/* Upload / Drag & Drop Area */
+.pureprint-upload-zone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    background: #f8fafc;
+    transition: all 0.2s ease-in-out;
+}
+
+.pureprint-upload-zone:hover,
+.pureprint-upload-zone.drag-over {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.pureprint-upload-zone .upload-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: inline-block;
+    color: #64748b;
+}
+
+.pureprint-upload-zone p {
+    margin: 0;
+    font-size: 14px;
+    color: #475569;
+}
+
+.pureprint-upload-zone p.small-hint {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 6px;
+}
+
+/* Hidden File Input */
+.pureprint-file-input {
+    display: none !important;
+}
+
+/* Main Editor (hidden until image loaded) */
+.pureprint-editor-workspace {
+    display: none;
+    margin-top: 16px;
+}
+
+/* Aspect-ratio constrained viewport */
+.pureprint-viewport {
+    position: relative;
+    width: 100%;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    overflow: hidden;
+    touch-action: none; /* Prevents scroll on drag */
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* Image inside viewport */
+.pureprint-viewport-image {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-drag: none;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+.pureprint-viewport-image:active {
+    cursor: grabbing;
+}
+
+/* Shading layers for Bleed/Wrap border sides */
+.pureprint-wrap-overlay {
+    position: absolute;
+    pointer-events: none;
+    z-index: 5;
+    transition: background 0.2s ease;
+}
+
+/* Shading style for 'foto' mode: Semi-transparent diagonal stripes */
+.pureprint-viewport.mode-foto .pureprint-wrap-overlay {
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(0, 0, 0, 0.08),
+        rgba(0, 0, 0, 0.08) 12px,
+        rgba(255, 255, 255, 0.15) 12px,
+        rgba(255, 255, 255, 0.15) 24px
+    );
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* Shading style for 'bianco' mode: Solid white overlay covering sides */
+.pureprint-viewport.mode-bianco .pureprint-wrap-overlay {
+    background: #ffffff;
+    opacity: 1;
+}
+
+/* Red dashed line representing the front face border */
+.pureprint-front-face-guide {
+    position: absolute;
+    pointer-events: none;
+    border: 2px dashed rgba(239, 68, 68, 0.95); /* Bright Red */
+    z-index: 10;
+    box-sizing: border-box;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.05); /* Soft dimming on the bleed part */
+}
+
+/* Layout Controls below the viewport */
+.pureprint-controls {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Zoom Slider Row */
+.pureprint-zoom-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pureprint-zoom-row span.control-icon {
+    font-size: 18px;
+    color: #64748b;
+}
+
+.pureprint-zoom-slider {
+    flex-grow: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+}
+
+.pureprint-zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #2563eb;
+    border: 2px solid #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: background 0.15s ease;
+}
+
+.pureprint-zoom-slider::-webkit-slider-thumb:hover {
+    background: #1d4ed8;
+}
+
+/* Action Buttons Grid */
+.pureprint-buttons-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.pureprint-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pureprint-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.pureprint-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+.pureprint-btn-danger {
+    margin-left: auto;
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
+.pureprint-btn-danger:hover {
+    background: #fee2e2;
+    color: #7f1d1d;
+}
+
+/* DPI Resolution indicator */
+.pureprint-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.pureprint-dpi-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.pureprint-dpi-badge.dpi-excellent {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.pureprint-dpi-badge.dpi-good {
+    background: #ffedd5;
+    color: #9a3412;
+}
+
+.pureprint-dpi-badge.dpi-poor {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Loader styling */
+.pureprint-loader {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.pureprint-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #e2e8f0;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: pureprint-spin 0.8s linear infinite;
+}
+
+@keyframes pureprint-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive adjust for mobile */
+@media (max-width: 480px) {
+    .pureprint-buttons-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .pureprint-btn-danger {
+        grid-column: span 2;
+        margin-left: 0;
+    }
+}
+
+/* Gallery Placeholder — takes the same space as the WooCommerce gallery */
+.pureprint-gallery-placeholder {
+    width: 100%;
+}
+
+/* Hide WooCommerce gallery when PurePrint replaces it */
+.pureprint-gallery-hidden {
+    display: none !important;
+}
+
+/* Disabled dropzone state — visible but not interactive */
+.pureprint-upload-zone.pureprint-disabled {
+    position: relative;
+    opacity: 0.55;
+    cursor: default;
+    pointer-events: none;
+    border-color: #e2e8f0;
+    background: #f1f5f9;
+}
+
+.pureprint-upload-zone.pureprint-disabled:hover {
+    border-color: #e2e8f0;
+    background: #f1f5f9;
+}
+
+/* Disabled overlay message */
+.pureprint-disabled-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: rgba(241, 245, 249, 0.9);
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.pureprint-disabled-overlay span {
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    text-align: center;
+}
+
+/* Activation transition */
+.pureprint-upload-zone {
+    transition: opacity 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}

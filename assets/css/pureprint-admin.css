@@ -1,0 +1,174 @@
+/**
+ * PurePrint Flow - Admin Stylesheet
+ * Styles for the WooCommerce order detail meta box.
+ */
+
+.pureprint-admin-meta-box {
+    padding: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Order item customization info */
+.pureprint-admin-item-preview {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #ccd0d4;
+}
+
+.pureprint-admin-item-preview:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.pureprint-admin-item-header {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: #1d2327;
+}
+
+/* Review Thumbnail Viewer */
+.pureprint-admin-viewport-wrapper {
+    margin-bottom: 12px;
+}
+
+.pureprint-admin-viewport {
+    position: relative;
+    width: 280px; /* Small fixed width for admin preview */
+    background: #f0f0f1;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.pureprint-admin-viewport-image {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
+    pointer-events: none; /* View-only */
+}
+
+/* Overlay shading for wrap */
+.pureprint-admin-wrap-overlay {
+    position: absolute;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.pureprint-admin-viewport.mode-foto .pureprint-admin-wrap-overlay {
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(0, 0, 0, 0.08),
+        rgba(0, 0, 0, 0.08) 6px,
+        rgba(255, 255, 255, 0.15) 6px,
+        rgba(255, 255, 255, 0.15) 12px
+    );
+}
+
+.pureprint-admin-viewport.mode-bianco .pureprint-admin-wrap-overlay {
+    background: #ffffff;
+}
+
+.pureprint-admin-front-face-guide {
+    position: absolute;
+    pointer-events: none;
+    border: 1px dashed rgba(220, 53, 69, 0.9);
+    z-index: 10;
+    box-sizing: border-box;
+}
+
+/* Configuration details list */
+.pureprint-admin-details {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.pureprint-admin-details ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.pureprint-admin-details li {
+    margin-bottom: 4px;
+    color: #50575e;
+}
+
+.pureprint-admin-details li strong {
+    color: #1d2327;
+}
+
+/* Print controls form */
+.pureprint-admin-print-actions {
+    background: #f6f7f7;
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px solid #dcdcde;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.pureprint-admin-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pureprint-admin-field-group label {
+    font-weight: 500;
+    font-size: 12px;
+    color: #50575e;
+}
+
+.pureprint-admin-field-group select,
+.pureprint-admin-field-group input {
+    height: 30px;
+    padding: 0 8px;
+    font-size: 13px;
+    border-radius: 4px;
+    border: 1px solid #8c8f94;
+}
+
+.pureprint-admin-custom-dims {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.pureprint-admin-custom-dims input {
+    width: 60px;
+}
+
+.pureprint-admin-btn-pdf {
+    height: 30px;
+    line-height: 28px;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    background: #2271b1;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pureprint-admin-btn-pdf:hover {
+    background: #135e96;
+}
+
+.pureprint-admin-btn-pdf svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
