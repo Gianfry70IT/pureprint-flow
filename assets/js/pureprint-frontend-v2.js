@@ -188,7 +188,10 @@
 
             // Heuristic to guess if user wants horizontal or vertical
             let isHorizontal = true;
-            if (combinedStr.includes('orizzontale') || combinedStr.includes('landscape') || combinedStr.includes('horizontal')) {
+            if (combinedStr.includes('automatic')) {
+                // "Automatico": follow the uploaded photo (landscape by default until a photo is loaded)
+                isHorizontal = uploadedImage ? uploadedImage.width >= uploadedImage.height : true;
+            } else if (combinedStr.includes('orizzontale') || combinedStr.includes('landscape') || combinedStr.includes('horizontal')) {
                 isHorizontal = true;
             } else if (combinedStr.includes('verticale') || combinedStr.includes('portrait') || combinedStr.includes('vertical')) {
                 isHorizontal = false;
@@ -391,8 +394,93 @@
             setTimeout(syncCustomizer, 100);
         });
 
+        /**
+         * Auto-select: when a dropdown has a single possible option, pick it.
+         * An automatic pick would otherwise filter the other dropdowns (e.g. 3 mm hides the 5 mm sizes),
+         * so it is cleared as soon as the customer starts using another dropdown.
+         */
+        const autoSelected = new Set();
+        let settingAuto = false;
+        // Name of the dropdown the customer is using: while set, nothing is auto-selected,
+        // otherwise the cleared pick would come straight back and keep filtering this dropdown.
+        let editing = null;
+
+        function autoSelectSingleOptions() {
+            if (editing) return;
+            $form.find('.variations select').each(function() {
+                const $s = $(this);
+                if ($s.val()) return;
+                const $opts = $s.find('option').filter(function() {
+                    return this.value !== '' && !this.disabled;
+                });
+                if ($opts.length === 1) {
+                    settingAuto = true;
+                    $s.val($opts.val());
+                    autoSelected.add(this.name);
+                    $s.trigger('change');
+                    settingAuto = false;
+                }
+            });
+        }
+
+        function stopEditing() {
+            if (!editing) return;
+            editing = null;
+            setTimeout(autoSelectSingleOptions, 0);
+        }
+
+        $form.on('woocommerce_update_variation_values', function() {
+            setTimeout(autoSelectSingleOptions, 0);
+        });
+
+        $form.on('change', '.variations select', function() {
+            if (settingAuto) return;
+            // A choice made by the customer is no longer automatic
+            autoSelected.delete(this.name);
+            if (editing === this.name) stopEditing();
+        });
+
+        $form.on('mousedown touchstart focusin', '.variations select', function() {
+            const current = this.name;
+            let cleared = false;
+            autoSelected.forEach(function(name) {
+                if (name === current) return;
+                const $other = $form.find('.variations select').filter(function() { return this.name === name; });
+                autoSelected.delete(name);
+                if ($other.val()) {
+                    cleared = true;
+                    settingAuto = true;
+                    $other.val('').trigger('change');
+                    settingAuto = false;
+                }
+            });
+            if (cleared) editing = current;
+        });
+
+        $form.on('focusout', '.variations select', function() {
+            if (editing === this.name) stopEditing();
+        });
+
+        // "Automatico" is a real choice, not an empty one: "Svuota" puts it back.
+        const automaticDefaults = {};
+        $form.find('.variations select').each(function() {
+            if (this.value && /automatic/i.test(this.value)) automaticDefaults[this.name] = this.value;
+        });
+
+        $form.on('click', '.reset_variations', function() {
+            autoSelected.clear();
+            editing = null;
+            setTimeout(function() {
+                $.each(automaticDefaults, function(name, value) {
+                    const $s = $form.find('.variations select').filter(function() { return this.name === name; });
+                    if (!$s.val()) $s.val(value).trigger('change');
+                });
+            }, 0);
+        });
+
         // Trigger initially
         syncCustomizer();
+        setTimeout(autoSelectSingleOptions, 0);
 
         /**
          * Upload Handlers
@@ -478,7 +566,9 @@
                                 $loading.hide();
                                 $workspace.fadeIn(250);
                                 
-                                // Initialize panning/scaling coordinates
+                                // Recompute the format ("Automatico" orientation follows the photo),
+                                // then initialize panning/scaling coordinates
+                                syncCustomizer();
                                 initializeImageDimensions();
                                 centerImage();
                                 toggleAddToCart(true);
@@ -514,6 +604,7 @@
             $dropzone.show();
             $('#pp-input-filename').val('');
             toggleAddToCart(false);
+            syncCustomizer(); // back to the default format when the orientation followed the photo
         }
 
         // Delete button

@@ -327,7 +327,21 @@ class PurePrint_Flow_Frontend {
 
 			// Frame thickness and wrap only make sense for canvas on frame.
 			$is_flat = isset( $data['support_type'] ) && 'piatto' === $data['support_type'];
-			if ( ! $is_flat ) {
+			if ( $is_flat ) {
+				// The orientation may be "Automatico" (follows the photo): show the one actually printed.
+				if ( $data['front_w_mm'] > $data['front_h_mm'] ) {
+					$orient_desc = 'Orizzontale';
+				} elseif ( $data['front_w_mm'] < $data['front_h_mm'] ) {
+					$orient_desc = 'Verticale';
+				} else {
+					$orient_desc = 'Quadrato';
+				}
+				$item_data[] = array(
+					'key'     => 'Orientamento stampa',
+					'value'   => $orient_desc,
+					'display' => $orient_desc
+				);
+			} else {
 				$item_data[] = array(
 					'key'     => 'Spessore Telaio',
 					'value'   => $thick_desc,
