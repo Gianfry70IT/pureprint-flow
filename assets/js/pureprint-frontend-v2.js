@@ -816,9 +816,11 @@
             zoomHintTimer = setTimeout(function() { $zoomHint.removeClass('is-visible'); }, 1500);
         }
 
-        $viewport.on('wheel', function(e) {
+        // Bound natively with passive:false: some themes (Flatsome) make every jQuery wheel listener
+        // passive, and then the browser ignores preventDefault and the page scrolls anyway.
+        $viewport[0].addEventListener('wheel', function(ev) {
             if (!uploadedImage) return;
-            const ev = e.originalEvent;
+            const e = ev;
             const now = Date.now();
 
             if (!ev.ctrlKey && !ev.metaKey) {
@@ -853,7 +855,7 @@
 
             $zoomSlider.val(currentVal);
             adjustZoom(currentVal / 100);
-        });
+        }, { passive: false });
 
         function adjustZoom(newZoom) {
             const oldZoom = imgState.zoom;
