@@ -801,19 +801,34 @@
             adjustZoom(newZoom);
         });
 
-        // Mousewheel zoom inside viewport
+        // Wheel zoom only with CTRL (or CMD) held, so scrolling the page over the photo does not zoom it.
+        // A trackpad pinch arrives as a wheel event with ctrlKey set, so it keeps working.
+        const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+        const $zoomHint = $('<div class="pureprint-zoom-hint" aria-hidden="true"></div>')
+            .text(isMac ? 'Per lo zoom tieni premuto CTRL o ⌘ mentre scorri, oppure pizzica il trackpad' : 'Per lo zoom tieni premuto CTRL mentre scorri')
+            .appendTo($viewport);
+        let zoomHintTimer = null;
+
         $viewport.on('wheel', function(e) {
             if (!uploadedImage) return;
-            e.preventDefault();
+            const ev = e.originalEvent;
 
-            const delta = e.originalEvent.deltaY;
-            let currentVal = parseInt($zoomSlider.val());
-            
-            if (delta < 0) {
-                currentVal = Math.min(500, currentVal + 10);
-            } else {
-                currentVal = Math.max(100, currentVal - 10);
+            if (!ev.ctrlKey && !ev.metaKey) {
+                // Let the page scroll, just say how to zoom
+                $zoomHint.addClass('is-visible');
+                clearTimeout(zoomHintTimer);
+                zoomHintTimer = setTimeout(function() { $zoomHint.removeClass('is-visible'); }, 1500);
+                return;
             }
+
+            e.preventDefault();
+            $zoomHint.removeClass('is-visible');
+
+            // Mouse wheel notches (~100px) move 10%, trackpad pinches move in small steps
+            let step = Math.round(-ev.deltaY * 0.1);
+            if (step === 0) step = ev.deltaY < 0 ? 1 : -1;
+            step = Math.max(-10, Math.min(10, step));
+            const currentVal = Math.max(100, Math.min(500, parseInt($zoomSlider.val()) + step));
 
             $zoomSlider.val(currentVal);
             adjustZoom(currentVal / 100);
