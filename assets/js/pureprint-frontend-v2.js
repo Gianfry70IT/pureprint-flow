@@ -209,6 +209,18 @@
                 front_h_mm = Math.max(val1, val2);
             }
 
+            // Flat panel (plexiglass, forex, dibond...): no frame, no wrap.
+            // The image covers the whole format plus the bleed, which gets trimmed.
+            if (window.pureprint_vars && pureprint_vars.support_type === 'piatto') {
+                return {
+                    front_w_mm: front_w_mm,
+                    front_h_mm: front_h_mm,
+                    thickness_mm: 0,
+                    bleed_mm: parseInt(pureprint_vars.flat_bleed_mm, 10) || 0,
+                    border_type: 'foto'
+                };
+            }
+
             // Parse border type
             let borderType = 'foto'; // default
             if (combinedStr.includes('bianco') || combinedStr.includes('white')) {

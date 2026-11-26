@@ -50,6 +50,26 @@ class PurePrint_Flow_Admin {
 			'description' => 'Seleziona questa casella per abilitare il configuratore di immagini PurePrint per questo prodotto variabile.',
 			'desc_tip'    => true,
 		) );
+		woocommerce_wp_select( array(
+			'id'          => '_pureprint_support_type',
+			'label'       => 'Tipo di supporto',
+			'options'     => array(
+				'tela'   => 'Tela su telaio (bordi avvolti)',
+				'piatto' => 'Pannello piatto (plexiglass, forex, dibond...)',
+			),
+			'value'       => PurePrint_Flow_Frontend::get_support_type( get_the_ID() ),
+			'description' => 'Tela: lo spessore del telaio viene letto dalle varianti e l\'immagine avvolge i lati. Pannello piatto: nessun telaio, l\'immagine copre il formato più l\'abbondanza.',
+			'desc_tip'    => true,
+		) );
+		woocommerce_wp_text_input( array(
+			'id'                => '_pureprint_flat_bleed_mm',
+			'label'             => 'Abbondanza pannello (mm)',
+			'type'              => 'number',
+			'value'             => PurePrint_Flow_Frontend::get_flat_bleed_mm( get_the_ID() ),
+			'custom_attributes' => array( 'min' => '0', 'max' => '20', 'step' => '1' ),
+			'description'       => 'Solo per i pannelli piatti: millimetri aggiunti su ogni lato del file di stampa, da rifilare.',
+			'desc_tip'          => true,
+		) );
 		echo '</div>';
 	}
 
@@ -59,6 +79,14 @@ class PurePrint_Flow_Admin {
 	public static function save_product_settings( $product_id ) {
 		$enabled = isset( $_POST['_pureprint_enabled'] ) ? 'yes' : 'no';
 		update_post_meta( $product_id, '_pureprint_enabled', $enabled );
+
+		$support = isset( $_POST['_pureprint_support_type'] ) ? sanitize_key( wp_unslash( $_POST['_pureprint_support_type'] ) ) : 'tela';
+		update_post_meta( $product_id, '_pureprint_support_type', 'piatto' === $support ? 'piatto' : 'tela' );
+
+		if ( isset( $_POST['_pureprint_flat_bleed_mm'] ) ) {
+			$bleed = max( 0, min( 20, intval( $_POST['_pureprint_flat_bleed_mm'] ) ) );
+			update_post_meta( $product_id, '_pureprint_flat_bleed_mm', $bleed );
+		}
 	}
 
 	/**
@@ -111,6 +139,7 @@ class PurePrint_Flow_Admin {
 			$total_thickness = $thickness + $bleed_mm;
 			$border = $item->get_meta( '_pureprint_border_type' );
 			$dpi = $item->get_meta( '_pureprint_dpi' );
+			$is_flat = ( 'piatto' === $item->get_meta( '_pureprint_support_type' ) );
 
 			$image_url = PUREPRINT_UPLOAD_URL . '/' . $file_name;
 			
@@ -188,8 +217,13 @@ class PurePrint_Flow_Admin {
 								}
 							?></li>
 							<li><strong>Dimensione ordinata:</strong> <?php echo esc_html( ($front_w/10) . 'x' . ($front_h/10) . ' cm' ); ?></li>
+							<?php if ( $is_flat ) : ?>
+							<li><strong>Supporto:</strong> Pannello piatto (senza telaio)</li>
+							<li><strong>Abbondanza nel PDF:</strong> <?php echo esc_html( $bleed_mm . ' mm per lato' ); ?></li>
+							<?php else : ?>
 							<li><strong>Spessore telaio ordinato:</strong> <?php echo esc_html( ($thickness/10) . ' cm' ); ?></li>
 							<li><strong>Tipo bordo:</strong> <?php echo ($border === 'foto') ? 'Tela avvolta' : 'Bordo bianco'; ?></li>
+							<?php endif; ?>
 							<li><strong>Risoluzione indicativa:</strong> <?php echo esc_html( $dpi ); ?> DPI</li>
 							<li><strong>File sorgente:</strong> <a href="<?php echo esc_url( $image_url ); ?>" target="_blank"><?php echo esc_html( $file_name ); ?></a></li>
 						</ul>
@@ -224,6 +258,9 @@ class PurePrint_Flow_Admin {
 						</div>
 					</div>
 
+					<?php if ( $is_flat ) : ?>
+					<input type="hidden" id="pp-thickness-<?php echo $item_id; ?>" value="original">
+					<?php else : ?>
 					<div class="pureprint-admin-field-group">
 						<label>Spessore telaio di stampa:</label>
 						<select id="pp-thickness-<?php echo $item_id; ?>">
@@ -232,6 +269,7 @@ class PurePrint_Flow_Admin {
 							<option value="40">4 cm</option>
 						</select>
 					</div>
+					<?php endif; ?>
 
 					<button type="button" class="pureprint-admin-btn-pdf pp-download-btn" data-item-id="<?php echo $item_id; ?>" data-order-id="<?php echo $order->get_id(); ?>">
 						<svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg> Scarica PDF per Stampa

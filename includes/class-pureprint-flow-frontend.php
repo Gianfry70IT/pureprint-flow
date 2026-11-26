@@ -35,6 +35,22 @@ class PurePrint_Flow_Frontend {
 	}
 
 	/**
+	 * Support type configured on the product: 'tela' (canvas on frame, wrapped edges) or 'piatto' (flat panel).
+	 */
+	public static function get_support_type( $product_id ) {
+		$type = get_post_meta( $product_id, '_pureprint_support_type', true );
+		return ( 'piatto' === $type ) ? 'piatto' : 'tela';
+	}
+
+	/**
+	 * Bleed (mm per side) used for flat panels. Defaults to 3 mm.
+	 */
+	public static function get_flat_bleed_mm( $product_id ) {
+		$bleed = get_post_meta( $product_id, '_pureprint_flat_bleed_mm', true );
+		return ( '' === $bleed || false === $bleed ) ? 3 : max( 0, min( 20, intval( $bleed ) ) );
+	}
+
+	/**
 	 * Inject a placeholder div into the product gallery column for PurePrint-enabled products.
 	 * This runs at priority 5, before the default WooCommerce gallery (priority 20).
 	 */
@@ -82,6 +98,8 @@ class PurePrint_Flow_Frontend {
 				'ajax_url'        => admin_url( 'admin-ajax.php' ),
 				'nonce'           => wp_create_nonce( 'pureprint_upload_nonce' ),
 				'gallery_replace' => true,
+				'support_type'    => self::get_support_type( $product_id ),
+				'flat_bleed_mm'   => self::get_flat_bleed_mm( $product_id ),
 			) );
 		}
 	}
@@ -257,8 +275,16 @@ class PurePrint_Flow_Frontend {
 					'thickness_mm' => intval( $source_data['pureprint_thickness_mm'] ),
 					'bleed_mm'     => isset( $source_data['pureprint_bleed_mm'] ) ? intval( $source_data['pureprint_bleed_mm'] ) : 0,
 					'border_type'  => sanitize_text_field( $source_data['pureprint_border_type'] ),
-					'dpi'          => intval( $source_data['pureprint_dpi'] )
+					'dpi'          => intval( $source_data['pureprint_dpi'] ),
+					'support_type' => self::get_support_type( $product_id ),
 				);
+
+				// Flat panels: no frame and no wrap. Enforce server side, whatever the browser sent.
+				if ( 'piatto' === $data['support_type'] ) {
+					$data['thickness_mm'] = 0;
+					$data['bleed_mm']     = self::get_flat_bleed_mm( $product_id );
+					$data['border_type']  = 'foto';
+				}
 
 				$cart_item_data['pureprint_data'] = $data;
 
@@ -299,17 +325,21 @@ class PurePrint_Flow_Frontend {
 				'display' => $size_desc
 			);
 
-			$item_data[] = array(
-				'key'     => 'Spessore Telaio',
-				'value'   => $thick_desc,
-				'display' => $thick_desc
-			);
+			// Frame thickness and wrap only make sense for canvas on frame.
+			$is_flat = isset( $data['support_type'] ) && 'piatto' === $data['support_type'];
+			if ( ! $is_flat ) {
+				$item_data[] = array(
+					'key'     => 'Spessore Telaio',
+					'value'   => $thick_desc,
+					'display' => $thick_desc
+				);
 
-			$item_data[] = array(
-				'key'     => 'Bordo',
-				'value'   => $border_desc,
-				'display' => $border_desc
-			);
+				$item_data[] = array(
+					'key'     => 'Bordo',
+					'value'   => $border_desc,
+					'display' => $border_desc
+				);
+			}
 
 			$item_data[] = array(
 				'key'     => 'Risoluzione Immagine',
@@ -451,6 +481,7 @@ class PurePrint_Flow_Frontend {
 			$item->update_meta_data( '_pureprint_bleed_mm', isset($data['bleed_mm']) ? $data['bleed_mm'] : 0 );
 			$item->update_meta_data( '_pureprint_border_type', isset($data['border_type']) ? $data['border_type'] : '' );
 			$item->update_meta_data( '_pureprint_dpi', isset($data['dpi']) ? $data['dpi'] : 300 );
+			$item->update_meta_data( '_pureprint_support_type', isset($data['support_type']) ? $data['support_type'] : 'tela' );
 		}
 	}
 
@@ -495,6 +526,7 @@ class PurePrint_Flow_Frontend {
 					$item->update_meta_data( '_pureprint_bleed_mm', isset($data['bleed_mm']) ? $data['bleed_mm'] : 0 );
 					$item->update_meta_data( '_pureprint_border_type', isset($data['border_type']) ? $data['border_type'] : '' );
 					$item->update_meta_data( '_pureprint_dpi', isset($data['dpi']) ? $data['dpi'] : 300 );
+					$item->update_meta_data( '_pureprint_support_type', isset($data['support_type']) ? $data['support_type'] : 'tela' );
 					$item->save();
 				}
 			}

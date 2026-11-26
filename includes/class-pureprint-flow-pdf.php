@@ -75,10 +75,12 @@ class PurePrint_Flow_PDF {
 		$Pw = $front_w + 2 * $thickness;
 		$Ph = $front_h + 2 * $thickness;
 
-		// Create PDF in Portrait custom size (using array size overrides orientation)
-		$pdf = new PurePrint_PDF( 'P', 'mm', array( $Pw, $Ph ) );
+		// FPDF normalises array page sizes to portrait (short side first) and then applies
+		// the orientation, so landscape prints need 'L' or the page comes out rotated and cropped.
+		$orientation = ( $Pw > $Ph ) ? 'L' : 'P';
+		$pdf = new PurePrint_PDF( $orientation, 'mm', array( $Pw, $Ph ) );
 		$pdf->SetAutoPageBreak( false );
-		$pdf->AddPage( 'P', array( $Pw, $Ph ) );
+		$pdf->AddPage( $orientation, array( $Pw, $Ph ) );
 
 		if ( 'foto' === $border ) {
 			// Mode 'foto': image must bleed to the outer edges.

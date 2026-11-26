@@ -3,7 +3,7 @@
  * Plugin Name: PurePrint Flow
  * Plugin URI:  https://speed-print.it
  * Description: Sistema avanzato di upload e configurazione stampe (Fotoquadri/Tele) per WooCommerce.
- * Version:     2.2.1
+ * Version:     2.3.0
  * Author:      NeroDigitale di Gianfranco Greco
  * Author URI:  https://nerodigitale.it
  * License:     GPL-2.0+
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define Plugin Constants
-define( 'PUREPRINT_VERSION', '2.2.1' );
+define( 'PUREPRINT_VERSION', '2.3.0' );
 define( 'PUREPRINT_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PUREPRINT_URL', plugin_dir_url( __FILE__ ) );
 
