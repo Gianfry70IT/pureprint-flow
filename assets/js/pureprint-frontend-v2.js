@@ -808,20 +808,41 @@
             .text(isMac ? 'Per lo zoom tieni premuto CTRL o ⌘ mentre scorri, oppure pizzica il trackpad' : 'Per lo zoom tieni premuto CTRL mentre scorri')
             .appendTo($viewport);
         let zoomHintTimer = null;
+        let lastZoomWheel = 0;
+
+        function showZoomHint() {
+            $zoomHint.addClass('is-visible');
+            clearTimeout(zoomHintTimer);
+            zoomHintTimer = setTimeout(function() { $zoomHint.removeClass('is-visible'); }, 1500);
+        }
 
         $viewport.on('wheel', function(e) {
             if (!uploadedImage) return;
             const ev = e.originalEvent;
+            const now = Date.now();
 
             if (!ev.ctrlKey && !ev.metaKey) {
-                // Let the page scroll, just say how to zoom
-                $zoomHint.addClass('is-visible');
-                clearTimeout(zoomHintTimer);
-                zoomHintTimer = setTimeout(function() { $zoomHint.removeClass('is-visible'); }, 1500);
+                // Right after a zoom (key just released, trackpad/Magic Mouse inertia still running)
+                // the leftover events must not scroll the page either.
+                if (now - lastZoomWheel < 400 && ev.cancelable) {
+                    e.preventDefault();
+                    lastZoomWheel = now;
+                    return;
+                }
+                // Otherwise let the page scroll and say how to zoom
+                showZoomHint();
+                return;
+            }
+
+            // The browser lets a page scroll that is already running finish without asking us
+            // (the event is not cancelable): zooming now would zoom AND scroll, so wait for a new gesture.
+            if (!ev.cancelable) {
+                showZoomHint();
                 return;
             }
 
             e.preventDefault();
+            lastZoomWheel = now;
             $zoomHint.removeClass('is-visible');
 
             // Mouse wheel notches (~100px) move 10%, trackpad pinches move in small steps
